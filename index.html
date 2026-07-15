@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="威威龟双形态展示 - 龟犬模式与龟神模式">
+    <title>威威龟 - 双形态展示</title>
+    
+    <!-- Anime.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <style>
+        /* ========== CSS Variables ========== */
+        :root {
+            --color-normal-bg-start: #2d1b69;
+            --color-normal-bg-end: #1a1a2e;
+            --color-normal-accent: #00d9ff;
+            --color-normal-secondary: #b794f6;
+            
+            --color-god-bg-start: #0a0a0a;
+            --color-god-bg-end: #2d0a0a;
+            --color-god-accent: #ff0844;
+            --color-god-secondary: #00ff41;
+            
+            --transition-fast: 0.2s ease;
+            --transition-normal: 0.4s ease;
+            --spacing-sm: 16px;
+            --spacing-md: 24px;
+            --spacing-lg: 48px;
+        }
+
+        /* ========== Reset & Base ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            line-height: 1.6;
+            color: #ffffff;
+            overflow-x: hidden;
+            background: #000;
+            min-height: 100vh;
+        }
+
+        /* ========== Particles ========== */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ========== Mode Containers ========== */
+        .mode-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            padding: var(--spacing-lg) var(--spacing-md);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .mode-container.active {
+            opacity: 1;
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ========== Normal Mode ========== */
+        #normal-mode {
+            background: linear-gradient(135deg, var(--color-normal-bg-start) 0%, var(--color-normal-bg-end) 100%);
+        }
+
+        .mode-header {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .mode-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .normal-title {
+            color: var(--color-normal-accent);
+            text-shadow: 0 0 10px var(--color-normal-accent), 0 0 20px var(--color-normal-accent), 0 0 40px var(--color-normal-accent);
+            animation: neon-pulse-cyan 1.5s ease-in-out infinite;
+        }
+
+        @keyframes neon-pulse-cyan {
+            0%, 100% { text-shadow: 0 0 10px var(--color-normal-accent), 0 0 20px var(--color-normal-accent), 0 0 40px var(--color-normal-accent); }
+            50% { text-shadow: 0 0 5px var(--color-normal-accent), 0 0 10px var(--color-normal-accent), 0 0 20px var(--color-normal-accent); }
+        }
+
+        .mode-subtitle {
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        /* ========== Stats Panel ========== */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: var(--spacing-sm);
+            border-radius: 10px;
+            transition: all var(--transition-normal);
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--color-normal-accent);
+            text-shadow: 0 0 10px var(--color-normal-accent);
+        }
+
+        /* ========== Image Grid ========== */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .image-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .image-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(0, 217, 255, 0.4);
+            border-color: var(--color-normal-accent);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-caption {
+            padding: var(--spacing-sm);
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--color-normal-accent);
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* ========== Features List ========== */
+        .features-list {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .feature-item {
+            display: flex;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border-left: 5px solid var(--color-normal-accent);
+            transition: all var(--transition-normal);
+            backdrop-filter: blur(5px);
+        }
+
+        .feature-item:hover {
+            transform: translateX(8px);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 5px 20px rgba(0, 217, 255, 0.2);
+        }
+
+        .feature-item.warning {
+            border-left-color: #ff0844;
+            background: rgba(255, 8, 68, 0.1);
+        }
+
+        .feature-item.warning:hover {
+            box-shadow: 0 5px 20px rgba(255, 8, 68, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .feature-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: var(--color-normal-accent);
+            font-weight: 700;
+        }
+
+        .feature-content p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* ========== Launch Button ========== */
+        .button-container {
+            text-align: center;
+            margin: var(--spacing-lg) 0;
+        }
+
+        .launch-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(135deg, var(--color-normal-accent), var(--color-normal-secondary));
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            box-shadow: 0 0 20px var(--color-normal-accent);
+            animation: button-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes button-pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px var(--color-normal-accent); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px var(--color-normal-accent); }
+        }
+
+        .launch-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 60px var(--color-normal-accent);
+        }
+
+        .launch-button .button-icon {
+            width: 40px;
+            height: 40px;
+        }
+
+        /* ========== God Mode ========== */
+        #god-mode {
+            background: linear-gradient(135deg, var(--color-god-bg-start) 0%, var(--color-god-bg-end) 100%);
+        }
+
+        .god-title {
+            color: var(--color-god-accent);
+            text-shadow: 0 0 10px var(--color-god-accent), 0 0 20px var(--color-god-accent), 0 0 40px var(--color-god-accent);
+        }
+
+        .glitch {
+            position: relative;
+            animation: glitch 1s ease-in-out infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); text-shadow: 2px 0 #ff0844, -2px 0 #00ff41; }
+            40% { transform: translate(2px, -2px); text-shadow: -2px 0 #ff0844, 2px 0 #00ff41; }
+            60% { transform: translate(-2px, -2px); }
+            80% { transform: translate(2px, 2px); }
+        }
+
+        .god-subtitle {
+            color: var(--color-god-secondary);
+        }
+
+        /* ========== Ability Panel ========== */
+        .ability-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: rgba(255, 8, 68, 0.15);
+            border-radius: 20px;
+            border: 2px solid var(--color-god-accent);
+            box-shadow: 0 0 30px rgba(255, 8, 68, 0.3), 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .ability-item {
+            text-align: center;
+            padding: var(--spacing-sm);
+            border-radius: 10px;
+            transition: all var(--transition-normal);
+        }
+
+        .ability-item:hover {
+            background: rgba(255, 8, 68, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .ability-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--color-god-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .ability-value {
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .ability-old {
+            color: #666;
+            text-decoration: line-through;
+        }
+
+        .ability-arrow {
+            color: var(--color-god-secondary);
+            margin: 0 5px;
+            font-weight: bold;
+        }
+
+        .ability-new {
+            color: var(--color-god-accent);
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--color-god-accent);
+        }
+
+        /* ========== God Mode Image Cards ========== */
+        .god-card {
+            border: 2px solid var(--color-god-accent);
+        }
+
+        .god-card:hover {
+            box-shadow: 0 15px 40px rgba(255, 8, 68, 0.6);
+            border-color: var(--color-god-secondary);
+        }
+
+        .god-card .image-caption {
+            color: var(--color-god-accent);
+            background: rgba(255, 8, 68, 0.2);
+        }
+
+        /* Special positioning for challenger image */
+        .god-card.challenger-card img {
+            object-position: center 35%;
+        }
+
+        /* ========== Skills List ========== */
+        .skills-list {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .skill-item {
+            display: flex;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            background: rgba(255, 8, 68, 0.15);
+            border-radius: 15px;
+            border-left: 5px solid var(--color-god-accent);
+            transition: all var(--transition-normal);
+            backdrop-filter: blur(5px);
+        }
+
+        .skill-item:hover {
+            transform: translateX(8px);
+            background: rgba(255, 8, 68, 0.25);
+            box-shadow: 0 5px 20px rgba(255, 8, 68, 0.4);
+        }
+
+        .skill-icon {
+            font-size: 2.5rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .skill-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: var(--color-god-accent);
+            font-weight: 700;
+            text-shadow: 0 0 10px var(--color-god-accent);
+        }
+
+        .skill-content p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* ========== Exit Button ========== */
+        .exit-button {
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            background: transparent;
+            border: 2px solid var(--color-god-accent);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+
+        .exit-button:hover {
+            background: var(--color-god-accent);
+            box-shadow: 0 0 30px var(--color-god-accent);
+        }
+
+        /* ========== Transition Overlay ========== */
+        .transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .splash-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .splash-image, .challenger-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .explosion-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 1px;
+        }
+
+        /* ========== Responsive ========== */
+        @media (max-width: 1024px) {
+            .image-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mode-title {
+                font-size: 2rem;
+            }
+
+            .stats-panel {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .image-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-sm);
+            }
+
+            .image-card img {
+                height: 240px;
+            }
+
+            .launch-button {
+                padding: 15px 30px;
+                font-size: 1.1rem;
+            }
+
+            .feature-item, .skill-item {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Particles Background - Normal Mode -->
+    <div id="particles-normal" class="particles-container"></div>
+
+    <!-- Normal Mode Container -->
+    <div id="normal-mode" class="mode-container active">
+        <div class="content-wrapper">
+            
+            <!-- Title Section -->
+            <header class="mode-header">
+                <h1 class="mode-title normal-title">
+                    威威龟 · 龟犬形态 <span class="emoji">🐕</span>
+                </h1>
+                <p class="mode-subtitle">Homo sapiens guoweius var. toxicus</p>
+            </header>
+            
+            <!-- Stats Panel -->
+            <section class="stats-panel">
+                <div class="stat-item">
+                    <span class="stat-label">懒癌等级</span>
+                    <span class="stat-value">★★★★★</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">床羁绊强度</span>
+                    <span class="stat-value">超限</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">手机依赖</span>
+                    <span class="stat-value">23.5h/天</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">嘴臭指数</span>
+                    <span class="stat-value">★★★★☆</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">词汇量</span>
+                    <span class="stat-value">~500词</span>
+                </div>
+            </section>
+            
+            <!-- Image Grid -->
+            <section class="image-grid">
+                <div class="image-card">
+                    <img src="威威龟照片/普通形态.jpg" alt="普通形态" loading="lazy">
+                    <p class="image-caption">日常废物状态</p>
+                </div>
+                <div class="image-card">
+                    <img src="威威龟照片/盯着主人时的样子.jpg" alt="盯着主人" loading="lazy">
+                    <p class="image-caption">眼神空洞，灵魂出窍</p>
+                </div>
+                <div class="image-card">
+                    <img src="威威龟照片/开心的样子.jpg" alt="开心的样子" loading="lazy">
+                    <p class="image-caption">难得的笑容（正在刷沙雕视频）</p>
+                </div>
+                <div class="image-card">
+                    <img src="威威龟照片/休闲龟状态.jpg" alt="休闲龟状态" loading="lazy">
+                    <p class="image-caption">标准床上瘫痪姿势</p>
+                </div>
+                <div class="image-card">
+                    <img src="威威龟照片/进食时的状态.jpg" alt="进食状态" loading="lazy">
+                    <p class="image-caption">觅食中的威威龟</p>
+                </div>
+                <div class="image-card">
+                    <img src="威威龟照片/IMG_20260711_114624.jpg" alt="日常状态" loading="lazy">
+                    <p class="image-caption">典型龟犬日常</p>
+                </div>
+            </section>
+            
+            <!-- Features List -->
+            <section class="features-list">
+                <div class="feature-item">
+                    <span class="feature-icon">🛏️</span>
+                    <div class="feature-content">
+                        <h3>床羁绊触发 PLUS</h3>
+                        <p>触发条件：任何身体部位接触床铺 | 持续时间：12-18小时 | 解除难度：极高</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📱</span>
+                    <div class="feature-content">
+                        <h3>手机依赖症 EXTREME</h3>
+                        <p>日均使用：23.5小时 | 主要内容：短视频、游戏资讯 | 成瘾程度：无药可救</p>
+                    </div>
+                </div>
+                <div class="feature-item warning">
+                    <span class="feature-icon">⚠️</span>
+                    <div class="feature-content">
+                        <h3>嘴臭特性（WARNING）</h3>
+                        <p>攻击目标：AI助手、游戏队友、群聊成员 | 破坏力：★★★★★ | 事后反应：从不道歉</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Valorant Launch Button -->
+            <div class="button-container">
+                <button id="valorant-button" class="launch-button">
+                    <img src="威威龟照片/瓦罗兰特图标.webp" alt="VALORANT" class="button-icon">
+                    <span class="button-text">启动瓦罗兰特！</span>
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Particles Background - God Mode -->
+    <div id="particles-god" class="particles-container" style="display: none;"></div>
+
+    <!-- God Mode Container -->
+    <div id="god-mode" class="mode-container" style="display: none;">
+        <div class="content-wrapper">
+            
+            <!-- Title Section with Glitch Effect -->
+            <header class="mode-header god-header">
+                <h1 class="mode-title god-title glitch" data-text="龟神降临 · GODMODE">
+                    龟神降临 · GODMODE <span class="emoji">⚡</span>
+                </h1>
+                <p class="mode-subtitle god-subtitle">终极形态已解锁</p>
+            </header>
+            
+            <!-- Ability Awakening Panel -->
+            <section class="ability-panel">
+                <div class="ability-item">
+                    <span class="ability-label">反应速度</span>
+                    <span class="ability-value">
+                        <span class="ability-old">龟速</span>
+                        <span class="ability-arrow">→</span>
+                        <span class="ability-new">+500% ↑</span>
+                    </span>
+                </div>
+                <div class="ability-item">
+                    <span class="ability-label">手速</span>
+                    <span class="ability-value">
+                        <span class="ability-old">懒得动</span>
+                        <span class="ability-arrow">→</span>
+                        <span class="ability-new">光速</span>
+                    </span>
+                </div>
+                <div class="ability-item">
+                    <span class="ability-label">词汇量</span>
+                    <span class="ability-value">
+                        <span class="ability-old">500</span>
+                        <span class="ability-arrow">→</span>
+                        <span class="ability-new">5000+</span>
+                    </span>
+                </div>
+                <div class="ability-item">
+                    <span class="ability-label">专注力</span>
+                    <span class="ability-value">
+                        <span class="ability-old">3秒</span>
+                        <span class="ability-arrow">→</span>
+                        <span class="ability-new">3小时</span>
+                    </span>
+                </div>
+                <div class="ability-item">
+                    <span class="ability-label">嘴臭等级</span>
+                    <span class="ability-value">
+                        <span class="ability-old">★★★★★</span>
+                        <span class="ability-arrow">→</span>
+                        <span class="ability-new">★★★★★★★</span>
+                    </span>
+                </div>
+            </section>
+            
+            <!-- Image Grid -->
+            <section class="image-grid god-grid">
+                <div class="image-card god-card challenger-card">
+                    <img src="威威龟照片/打瓦时的龟神：你才是挑战者.jpg" alt="龟神形态" loading="lazy">
+                    <p class="image-caption">终极形态解锁</p>
+                </div>
+                <div class="image-card god-card">
+                    <img src="威威龟照片/进入打瓦状态.jpg" alt="进入打瓦状态" loading="lazy">
+                    <p class="image-caption">眼神聚焦，杀气毕露</p>
+                </div>
+                <div class="image-card god-card">
+                    <img src="威威龟照片/打瓦胜利结算动画.jpg" alt="胜利结算" loading="lazy">
+                    <p class="image-caption">巅峰时刻</p>
+                </div>
+                <div class="image-card god-card">
+                    <img src="威威龟照片/蔡徐坤形态.jpg" alt="蔡徐坤形态" loading="lazy">
+                    <p class="image-caption">神秘变体（待研究）</p>
+                </div>
+                <div class="image-card god-card">
+                    <img src="威威龟照片/IMG_20241024_183936.jpg" alt="龟神威严" loading="lazy">
+                    <p class="image-caption">龟神威严姿态</p>
+                </div>
+                <div class="image-card god-card">
+                    <img src="威威龟照片/IMG_20241025_192027.jpg" alt="觉醒状态" loading="lazy">
+                    <p class="image-caption">能力全开状态</p>
+                </div>
+            </section>
+            
+            <!-- Skills List -->
+            <section class="skills-list">
+                <div class="skill-item">
+                    <span class="skill-icon">⚡</span>
+                    <div class="skill-content">
+                        <h3>手速觉醒</h3>
+                        <p>平时打字都嫌累，游戏里疯狂操作 | APM（每分钟操作数）暴增</p>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <span class="skill-icon">💬</span>
+                    <div class="skill-content">
+                        <h3>语言能力爆发</h3>
+                        <p>词汇量瞬间暴增10倍 | 其中90%为游戏术语和脏话 | 队友交流能力 MAX</p>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <span class="skill-icon">🔥</span>
+                    <div class="skill-content">
+                        <h3>超限嘴臭突破</h3>
+                        <p>嘴臭等级突破限制 | 目标：队友、对手、游戏机制、运气、网络 | 破坏力超越常规</p>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <span class="skill-icon">🎯</span>
+                    <div class="skill-content">
+                        <h3>龟神专注</h3>
+                        <p>眼神聚焦，杀气毕露 | 可持续专注3小时 | 退出后进入"贤者时间"</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Exit Button -->
+            <div class="button-container">
+                <button id="exit-button" class="exit-button">
+                    <span class="button-text">退出游戏</span>
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Transition Animation Overlay -->
+    <div id="transition-overlay" class="transition-overlay" style="display: none;">
+        
+        <!-- Stage 1: Valorant Launch Splash -->
+        <div id="valorant-splash" class="splash-layer">
+            <img src="威威龟照片/瓦罗兰特启动特效.webp" alt="VALORANT" class="splash-image">
+        </div>
+        
+        <!-- Stage 4: Challenger Splash -->
+        <div id="challenger-splash" class="splash-layer">
+            <img src="威威龟照片/打瓦时的龟神：你才是挑战者.jpg" alt="你才是挑战者" class="challenger-image">
+        </div>
+        
+        <!-- Stage 3: Explosion Particles Container -->
+        <div id="explosion-particles" class="explosion-container"></div>
+        
+    </div>
+
+
+    <script>
+        // ========== State Management ==========
+        let currentMode = 'normal'; // 'normal' or 'god'
+        let isTransitioning = false;
+
+        // ========== Particles Configuration ==========
+        const particlesConfigNormal = {
+            particles: {
+                number: { value: 100 },
+                color: { value: '#b794f6' },
+                shape: { type: 'circle' },
+                opacity: {
+                    value: 0.5,
+                    random: true
+                },
+                size: {
+                    value: 3,
+                    random: true
+                },
+                move: {
+                    enable: true,
+                    speed: 1,
+                    direction: 'none',
+                    random: true,
+                    out_mode: 'out'
+                }
+            }
+        };
+
+        const particlesConfigGod = {
+            particles: {
+                number: { value: 200 },
+                color: { value: '#ff0844' },
+                shape: { type: 'circle' },
+                opacity: {
+                    value: 0.7,
+                    random: true
+                },
+                size: {
+                    value: 2,
+                    random: true
+                },
+                move: {
+                    enable: true,
+                    speed: 3,
+                    direction: 'none',
+                    random: true,
+                    out_mode: 'out'
+                }
+            }
+        };
+
+        // ========== Initialize Particles ==========
+        function initParticles() {
+            if (typeof particlesJS !== 'undefined') {
+                particlesJS('particles-normal', particlesConfigNormal);
+                particlesJS('particles-god', particlesConfigGod);
+            }
+        }
+
+        // ========== Create Explosion Particles ==========
+        function createExplosionParticles() {
+            const container = document.getElementById('explosion-particles');
+            const particleCount = 100;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'absolute';
+                particle.style.width = '4px';
+                particle.style.height = '4px';
+                particle.style.borderRadius = '50%';
+                particle.style.backgroundColor = '#ff0844';
+                particle.style.left = '0';
+                particle.style.top = '0';
+                particle.className = 'explosion-particle';
+                container.appendChild(particle);
+            }
+        }
+
+        // ========== Transformation Animation Timeline ==========
+        function transformToGodMode() {
+            if (isTransitioning) return;
+            isTransitioning = true;
+
+            const normalMode = document.getElementById('normal-mode');
+            const godMode = document.getElementById('god-mode');
+            const particlesNormal = document.getElementById('particles-normal');
+            const particlesGod = document.getElementById('particles-god');
+            const transitionOverlay = document.getElementById('transition-overlay');
+            const valorantSplash = document.getElementById('valorant-splash');
+            const challengerSplash = document.getElementById('challenger-splash');
+            const explosionContainer = document.getElementById('explosion-particles');
+
+            // Show transition overlay
+            transitionOverlay.style.display = 'block';
+
+            // Create timeline
+            const timeline = anime.timeline({
+                complete: function() {
+                    // Cleanup
+                    transitionOverlay.style.display = 'none';
+                    valorantSplash.style.opacity = '0';
+                    challengerSplash.style.opacity = '0';
+                    explosionContainer.innerHTML = '';
+                    isTransitioning = false;
+                    currentMode = 'god';
+                }
+            });
+
+            // Stage 1: Valorant Launch Splash (1s)
+            timeline.add({
+                targets: valorantSplash,
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeInQuad',
+                begin: function() {
+                    valorantSplash.style.opacity = '0';
+                }
+            })
+            .add({
+                targets: valorantSplash,
+                opacity: [1, 1],
+                duration: 700,
+                easing: 'linear'
+            })
+
+            // Stage 2: Glitch Effect + Fade out Valorant (0.5s)
+            .add({
+                targets: valorantSplash,
+                opacity: [1, 0],
+                translateX: [0, anime.random(-10, 10)],
+                translateY: [0, anime.random(-10, 10)],
+                duration: 500,
+                easing: 'easeOutQuad'
+            })
+
+            // Stage 3: Create and animate explosion particles (0.5s)
+            .add({
+                begin: function() {
+                    createExplosionParticles();
+                },
+                targets: '.explosion-particle',
+                translateX: function() {
+                    return anime.random(-600, 600);
+                },
+                translateY: function() {
+                    return anime.random(-600, 600);
+                },
+                scale: [1, 0],
+                opacity: [1, 0],
+                duration: 800,
+                delay: anime.stagger(3),
+                easing: 'easeOutExpo'
+            }, '-=300')
+
+            // Stage 4: Challenger Splash appears (1s)
+            .add({
+                targets: challengerSplash,
+                opacity: [0, 1],
+                scale: [0.8, 1],
+                rotate: [0, anime.random(-5, 5)],
+                duration: 500,
+                easing: 'easeOutBack',
+                begin: function() {
+                    challengerSplash.style.opacity = '0';
+                }
+            }, '-=400')
+            .add({
+                targets: challengerSplash,
+                scale: [1, 1.02, 1],
+                rotate: [0, 2, -2, 0],
+                duration: 500,
+                easing: 'easeInOutQuad'
+            })
+
+            // Stage 5: Transition to God Mode (0.5s)
+            .add({
+                targets: challengerSplash,
+                opacity: [1, 0],
+                scale: [1, 1.2],
+                duration: 500,
+                easing: 'easeInQuad',
+                begin: function() {
+                    // Switch modes
+                    normalMode.classList.remove('active');
+                    particlesNormal.style.display = 'none';
+                    
+                    setTimeout(() => {
+                        normalMode.style.display = 'none';
+                        godMode.style.display = 'block';
+                        particlesGod.style.display = 'block';
+                        
+                        setTimeout(() => {
+                            godMode.classList.add('active');
+                        }, 50);
+                    }, 250);
+                }
+            });
+        }
+
+        // ========== Transform Back to Normal Mode ==========
+        function transformToNormalMode() {
+            if (isTransitioning) return;
+            isTransitioning = true;
+
+            const normalMode = document.getElementById('normal-mode');
+            const godMode = document.getElementById('god-mode');
+            const particlesNormal = document.getElementById('particles-normal');
+            const particlesGod = document.getElementById('particles-god');
+
+            // Simple fade transition
+            anime({
+                targets: godMode,
+                opacity: [1, 0],
+                duration: 500,
+                easing: 'easeOutQuad',
+                complete: function() {
+                    godMode.style.display = 'none';
+                    godMode.classList.remove('active');
+                    particlesGod.style.display = 'none';
+                    
+                    normalMode.style.display = 'block';
+                    particlesNormal.style.display = 'block';
+                    
+                    anime({
+                        targets: normalMode,
+                        opacity: [0, 1],
+                        duration: 500,
+                        easing: 'easeInQuad',
+                        begin: function() {
+                            normalMode.classList.add('active');
+                        },
+                        complete: function() {
+                            isTransitioning = false;
+                            currentMode = 'normal';
+                        }
+                    });
+                }
+            });
+        }
+
+        // ========== Event Listeners ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize particles
+            initParticles();
+
+            // Valorant button click
+            const valorantButton = document.getElementById('valorant-button');
+            if (valorantButton) {
+                valorantButton.addEventListener('click', transformToGodMode);
+            }
+
+            // Exit button click
+            const exitButton = document.getElementById('exit-button');
+            if (exitButton) {
+                exitButton.addEventListener('click', transformToNormalMode);
+            }
+
+            // Responsive particle count adjustment
+            function adjustParticleCount() {
+                const width = window.innerWidth;
+                if (width < 768) {
+                    particlesConfigNormal.particles.number.value = 50;
+                    particlesConfigGod.particles.number.value = 80;
+                } else if (width < 1024) {
+                    particlesConfigNormal.particles.number.value = 80;
+                    particlesConfigGod.particles.number.value = 150;
+                } else {
+                    particlesConfigNormal.particles.number.value = 100;
+                    particlesConfigGod.particles.number.value = 200;
+                }
+            }
+
+            adjustParticleCount();
+            window.addEventListener('resize', adjustParticleCount);
+        });
+    </script>
+
+</body>
+</html>
